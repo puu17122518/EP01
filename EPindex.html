@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบความรู้ความเข้าใจในอาหารโรงเบียร์ฯ EP.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+        .correct { color: #059669; font-weight: bold; }
+        .incorrect { color: #dc2626; font-weight: bold; }
+        .choice-label { cursor: pointer; transition: all 0.2s; }
+        .choice-label:hover { background-color: #f9fafb; }
+    </style>
+</head>
+<body class="py-10 px-4">
+    <div id="quiz-app" class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-red-700 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">แบบทดสอบความรู้ความเข้าใจในอาหารโรงเบียร์เยอรมันตะวันแดง</h1>
+            <p class="mt-2 text-red-100">หลักสูตรอบรม (เดือนสิงหาคม 2569) - EP.1</p>
+        </div>
+
+        <!-- Info Form -->
+        <div id="info-form" class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">ชื่อ - สกุล</label>
+                    <input type="text" id="user-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">แผนก</label>
+                    <input type="text" id="user-dept" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">รหัสพนักงาน</label>
+                    <input type="text" id="user-id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">วันที่</label>
+                    <input type="date" id="test-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+            </div>
+            <button onclick="startQuiz()" class="mt-8 w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 transition">เริ่มทำข้อสอบ</button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-container" class="hidden p-8">
+            <div id="questions-list" class="space-y-10">
+                <!-- Questions will be injected here -->
+            </div>
+            <div class="mt-12 text-center">
+                <button onclick="submitQuiz()" id="btn-submit" class="bg-green-600 text-white font-bold py-4 px-12 rounded-full text-xl hover:bg-green-700 transition shadow-lg">ส่งคำตอบและตรวจคะแนน</button>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-container" class="hidden p-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-800">ผลการทดสอบ</h2>
+            <div class="mt-6 p-6 bg-gray-50 rounded-xl inline-block">
+                <p class="text-xl">คุณ <span id="res-name" class="font-bold text-red-600"></span></p>
+                <p class="text-4xl font-bold mt-4">คะแนนที่ได้: <span id="score-display">0</span> / 50</p>
+            </div>
+            <div id="feedback-list" class="mt-10 text-left space-y-6">
+                <!-- Feedback results will be shown here -->
+            </div>
+            <button onclick="location.reload()" class="mt-10 bg-gray-600 text-white py-2 px-6 rounded-lg hover:bg-gray-700">ทำแบบทดสอบอีกครั้ง</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "หมวดอาหารหลักครัวไทย มีกี่หมวด", a: ["5", "6", "7", "8"], c: 1, r: "6 หมวด: 1.อาหารว่าง 2.ทอด ปิ้ง ย่าง 3.ส้มตำยำ 4.ผัด อบ นึ่ง 5.ต้มยำ 6.อาหารจานเดียว" },
+            { q: "GLUTEN FREE คือแพ้อะไร", a: ["ถั่ว", "แป้ง", "กุ้ง", "ของแถม"], c: 1, r: "แป้ง" },
+            { q: "VEGAN เป็นใคร", a: ["ไม่กินผัก", "ไม่กินแป้ง", "ไม่กินถั่ว", "ไม่กินเนื้อ"], c: 3, r: "ไม่กินเนื้อสัตว์" },
+            { q: "Nut Allergy กินอะไรได้", a: ["ส้มตำไทย", "เมี่ยงกุ้ง", "ขาหมูทอด", "ทอดมันปลากราย"], c: 2, r: "ขาหมูทอด" },
+            { q: "ใครคือ HALAL", a: ["กินขาหมูทอด", "กินเสือร้องไห้", "กินไส้กรอกรวม", "กินยำวุ้นเส้น"], c: 1, r: "กินเสือร้องไห้ (เนื้อวัว)" },
+            { q: "เมนูใดไม่มีถั่ว", a: ["กุ้งชุบแป้งทอด", "เมี่ยงกุ้ง", "ส้มตำผลไม้", "ยำผักบุ้งทอดกรอบ"], c: 0, r: "กุ้งชุบแป้งทอด" },
+            { q: "ข้อใดไม่มีกุ้ง", a: ["น้ำพริกเผา", "น้ำปลาหวาน", "น้ำจิ้มไก่บ้านแช่เหล้า", "ยำถั่วพู"], c: 0, r: "น้ำพริกเผา (ที่ใช้ในรายการนี้ระบุว่าไม่มีกุ้ง)" },
+            { q: "น้ำจิ้มใด เจกินได้", a: ["ซอสพริก", "มัสตาร์ด", "มายองเนส", "น้ำจิ้มไก่"], c: 1, r: "มัสตาร์ด" },
+            { q: "สั่งยำปลาดุกฟูอยากได้น้ำจิ้มเพิ่มทำอย่างไร", a: ["ตี 8385", "ตี 04", "เดินไปขอ", "แจ้งหมด"], c: 0, r: "8385" },
+            { q: "ไก่บ้านแช่เหล้าใช้น้ำจิ้มอะไร", a: ["ซีฟู้ด+เซียงไฮ้", "น้ำพริกเผา+เต้าเจี้ยว", "เซี่ยงไฮ้ เต้าเจี้ยว", "เซี่ยงไฮ้ พริกเผาหอมแดง"], c: 2, r: "เซี่ยงไฮ้ เต้าเจี้ยว" },
+            { q: "น้ำปลาหวานไม่ใส่อะไร", a: ["กุ้งแห้ง", "ถั่วลิสง", "กะปิ", "ถั่วลิสง (เฉลยซ้ำ)"], c: 3, r: "ถั่วลิสง" },
+            { q: "ข้าวต้มหมู ไม่เสิร์ฟน้ำจิ้มอะไร", a: ["เต้าเจี้ยว", "พริกป่น", "พริกดอง", "น้ำปลา"], c: 0, r: "เต้าเจี้ยว" },
+            { q: "เมนูใดไม่เสิร์ฟพริกน้ำปลา", a: ["ข้าวผัดปู", "กระเพราหมู", "ข้าวผัดสับปะรด", "ข้าวต้มปลา"], c: 3, r: "ข้าวต้มปลา" },
+            { q: "ในพริกน้ำปลาไม่มีอะไร", a: ["กระเทียมจีน", "กระเทียมไทย", "พริกชี้ฟ้า", "พริกขี้หนู"], c: 2, r: "พริกชี้ฟ้า" },
+            { q: "มัสตาร์ดมีรสเผ็ด/กลิ่นฉุนคล้ายกับอะไร", a: ["โซยุ", "วาซาบิ", "พริกไทย", "หมาล่า"], c: 1, r: "วาซาบิ" },
+            { q: "น้ำจิ้มปลากะพงกับน้ำจิ้มซีฟู้ดใช้อะไรเหมือนกัน", a: ["หอมแดง", "พริกขี้หนูสวน", "ผักชี", "กระเทียม"], c: 1, r: "พริกขี้หนูสวน" },
+            { q: "เมนูใดไม่ใช้น้ำจิ้มแจ่ว", a: ["ปลาช่อนนึ่ง", "คอหมูย่าง", "เสือร้องไห้", "ปลาเผา"], c: 3, r: "ปลาเผา" },
+            { q: "แจ่วขาว/แจ่วแดงเหมือนกันที่อะไร", a: ["สีของแจ่ว", "ปลาร้า", "เนื้อปลา", "รสชาติ"], c: 2, r: "เนื้อปลา" },
+            { q: "ความต่างของขาหมูทอด (M กับ L)", a: ["รสชาติ", "น้ำหนัก", "หนังกรอบ", "น้ำจิ้ม"], c: 1, r: "น้ำหนัก" },
+            { q: "(มันบด : ผักดอง) ในขาหมูเล็ก เสิร์ฟเท่าไร", a: ["2:1", "1:2", "2:2", "1:1"], c: 3, r: "1:1" },
+            { q: "หมู 1 ตัวได้ขาหมูเสิร์ฟได้กี่ขา", a: ["1", "2", "3", "4"], c: 1, r: "2 ขา" },
+            { q: "จุดเด่นของขาหมูโรงเบียร์", a: ["หนังกรอบ", "เนื้อนุ่ม", "หอมกลิ่นสมุนไพร", "ถูกทุกข้อ"], c: 3, r: "ถูกทุกข้อ" },
+            { q: "เนื้อเปื่อยนุ่ม หอมเครื่องเทศ จิ้มแจ่วมอลต์ คือเมนูใด", a: ["ปลากะพงเผา", "ขาหมูทอด", "ซี่โครงย่าง", "ไส้กรอกรวม"], c: 2, r: "ซี่โครงย่าง" },
+            { q: "ไส้กรอกทำมาจากอะไร", a: ["ไส้แกะ", "ไส้หมู", "คอลลาเจน", "ผิดทุกข้อ"], c: 0, r: "ไส้แกะ" },
+            { q: "ถ้าลูกค้าสั่งไส้กรอก เวียนนาอย่างเดียวจะได้กี่ชิ้น", a: ["2", "3", "4", "5"], c: 1, r: "3 ชิ้น" },
+            { q: "ไส้กรอกตัวใดที่มีกลิ่นเครื่องเทศชัดเจน", a: ["เวียนนา", "ปาปริก้า", "ชีส", "เนินเบิร์ก"], c: 3, r: "เนินเบิร์ก" },
+            { q: "น้ำหนักของปลากะพงที่โรงเบียร์ใช้คือ", a: ["6-7 ขีด", "7-8 ขีด", "8-9 ขีด", "9 ขีด"], c: 1, r: "7-8 ขีด" },
+            { q: "เหล้าที่ใส่ใน ราดปลากะพงทอดคือ", a: ["วิสกี้", "ข้ามหอม", "บรั่นดี", "โซจู"], c: 2, r: "บรั่นดี" },
+            { q: "ด้านนอกก่อนเผาปลากะพงจะต้องทาด้วยอะไร", a: ["เหล้า+เกลือ", "เนย+เกลือ", "เนย", "เกลือ"], c: 1, r: "เนย+เกลือ" },
+            { q: "เมนูปลากะพง (ทั้งตัว) ในร้านมีกี่เมนู", a: ["4 เมนู", "5 เมนู", "6 เมนู", "7 เมนู"], c: 3, r: "7 เมนู (ตามตัวเลือกในข้อสอบ)" },
+            { q: "ปลากะพงที่โรงเบียร์ใช้คือปลาที่เลี้ยงที่ใด", a: ["ปลากระชัง", "ปลาบ่อดิน", "ปลาทะเล", "ชลประทาน"], c: 0, r: "ปลากระชัง" },
+            { q: "สีสวยเหมือนหมี่หยก หอมกินน้ำซอสผัด คือ", a: ["กะหล่ำปลีทอดน้ำปลา", "ไหลบัวผัดเตาเจี้ยว", "ผักบุ้งไฟแดง", "ผักบุ้งซอยตะวันแดง"], c: 3, r: "ผักบุ้งซอยตะวันแดง" },
+            { q: "ผักบุ้งซอยตะวันแดงใช้ผักบุ้งชนิดใด", a: ["ผักบุ้งจีน", "ผักบุ้งนา", "ผักบุ้งไทย", "ผักบุ้งไฟแดง"], c: 2, r: "ผักบุ้งไทย" },
+            { q: "ข้อใดคือไหลบัว", a: ["ก้านดอก", "บัวสาย", "ต้นใหม่ใต้น้ำ", "ผิดหมดทุกข้อ"], c: 2, r: "ต้นใหม่ใต้น้ำ" },
+            { q: "เลือดในเกาเหลาโฟได้มาจาก", a: ["หมู", "ปลา", "เป็ด", "ไก่"], c: 2, r: "เป็ด" },
+            { q: "หนังกรอบ มันน้อย เนื้อนุ่ม หอมกลิ่นเครื่องเทศ คือเมนูใด", a: ["ซี่โครงย่าง", "คอหมูย่าง", "ไส้กรอกรวม", "ขาหมูทอด"], c: 3, r: "ขาหมูทอด" },
+            { q: "เนื้อนุ่ม หอมกลิ่นเครื่องเทศ คือเมนูใด", a: ["ซี่โครงย่าง", "คอหมูย่าง", "ไส้กรอกรวม", "ขาหมูทอด"], c: 0, r: "ซี่โครงย่าง" },
+            { q: "ก้านอ่อนกรอบ ผัดซอสสูตรโรงเบียร์ คือเมนูใด", a: ["กะหล่ำปลีทอดน้ำปลา", "ไหลบัวผัดเตาเจี้ยว", "ผักบุ้งไฟแดง", "ผักบุ้งซอยตะวันแดง"], c: 3, r: "ผักบุ้งซอยตะวันแดง" },
+            { q: "หนังกรอบ หอมกลิ่นเครื่องเทศหลากหลายชนิด คือเมนูใด", a: ["ซี่โครงย่าง", "คอหมูย่าง", "ไส้กรอกรวม", "ขาหมูทอด"], c: 2, r: "ไส้กรอกรวม" },
+            { q: "ทั้งทอดทั้งเผา สด เนื้อนุ่มฟู คือวัตถุดิบใด", a: ["ซี่โครงหมู", "คอหมูย่าง", "ปลากะพง", "ขาหมูทอด"], c: 2, r: "ปลากะพง" },
+            { q: "แพ้อาหารทะเลไม่ควรกินเมนูใด", a: ["มะม่วงน้ำปลาหวาน", "ไส้กรอกรวม", "ผักบุ้งซอย", "ขาหมูทอด"], c: 0, r: "มะม่วงน้ำปลาหวาน" },
+            { q: "สูตรพริกแกงใต้เข้มข้น กินกับข้าวสวยร้อน ๆ คือเมนูใด", a: ["ดุกฟูผัดฉ่า", "แกงเหลืองไหลบัว", "ไหลบัวผัดเต้าเจี้ยว", "เกาเหลาเย็นตาโฟ"], c: 1, r: "แกงเหลืองไหลบัว" },
+            { q: "ข้อสำคัญที่ต้องรู้ในการเชียร์อาหาร คือ", a: ["รู้จักเมนู", "รู้จักวัตถุดิบ", "รู้จักลูกค้า", "ถูกทุกข้อ"], c: 3, r: "ถูกทุกข้อ" },
+            { q: "รู้จักลูกค้า ข้อใดสำคัญที่สุด", a: ["ชื่ออะไร", "ชอบอะไร", "แพ้อะไร", "มาจากไหน"], c: 2, r: "แพ้อะไร" },
+            { q: "ทำไมต้องกินอาหารโรงเบียร์", a: ["วัตถุดิบดีมีคุณภาพ", "สูตรมาตรฐาน", "รสชาติมาตรฐาน", "ถูกทุกข้อ"], c: 3, r: "ถูกทุกข้อ" },
+            { q: "ใครไม่ใช่คนที่เป็น SEAFOOD ALLERGY", a: ["กบกินไก่", "ไก่กินกุ้ง", "กุ้งกินหมู", "ปลากินเนื้อ"], c: 1, r: "ไก่กินกุ้ง" },
+            { q: "MEAT ALLERGY คือใคร", a: ["กุ้งกินกุ้ง", "หมูกินหมู", "กุ้งกินหมู", "ปลากินเนื้อ"], c: 0, r: "กุ้งกินกุ้ง" },
+            { q: "สิ่งใดที่ฮาลาลเคร่งครัด", a: ["หมู", "แอลกอฮอล์", "โรงเชือด", "ถูกทุกข้อ"], c: 3, r: "ถูกทุกข้อ" },
+            { q: "ป้ายติดว่า EXP.30-07-25 หมายถึง", a: ["วันผลิต", "วันเริ่มขาย", "วันหมดอายุ", "วันเลิกผลิต"], c: 2, r: "วันหมดอายุ" },
+            { q: "คนใดแพ้อาหาร", a: ["กุ้งจาม", "ไก่หาว", "นกเกา", "ปลาอาเจียน"], c: 3, r: "ปลาอาเจียน" }
+        ];
+
+        function startQuiz() {
+            const name = document.getElementById('user-name').value;
+            if (!name) {
+                alert("กรุณากรอกชื่อ-นามสกุลก่อนเริ่ม");
+                return;
+            }
+            document.getElementById('info-form').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            renderQuestions();
+            window.scrollTo(0,0);
+        }
+
+        function renderQuestions() {
+            const list = document.getElementById('questions-list');
+            list.innerHTML = questions.map((item, index) => `
+                <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-red-600">
+                    <p class="text-lg font-bold mb-4">${index + 1}. ${item.q}</p>
+                    <div class="space-y-2">
+                        ${item.a.map((choice, i) => `
+                            <label class="choice-label flex items-center p-3 border rounded-lg bg-white">
+                                <input type="radio" name="q${index}" value="${i}" class="w-4 h-4 text-red-600">
+                                <span class="ml-3 text-gray-700">${String.fromCharCode(65 + i)}: ${choice}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            const feedbackHtml = [];
+            
+            for (let i = 0; i < questions.length; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const userAnswer = selected ? parseInt(selected.value) : -1;
+                const isCorrect = userAnswer === questions[i].c;
+
+                if (isCorrect) score++;
+
+                feedbackHtml.push(`
+                    <div class="p-4 border-b">
+                        <p class="font-bold">${i + 1}. ${questions[i].q}</p>
+                        <p class="${isCorrect ? 'correct' : 'incorrect'}">
+                            ของคุณ: ${userAnswer === -1 ? 'ไม่ได้ตอบ' : questions[i].a[userAnswer]} 
+                            ${isCorrect ? '(ถูกต้อง)' : '(ผิด)'}
+                        </p>
+                        ${!isCorrect ? `<p class="text-gray-600 italic">เฉลย: ${questions[i].a[questions[i].c]} (${questions[i].r})</p>` : ''}
+                    </div>
+                `);
+            }
+
+            document.getElementById('res-name').innerText = document.getElementById('user-name').value;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('feedback-list').innerHTML = feedbackHtml.join('');
+            
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>
+```eof
